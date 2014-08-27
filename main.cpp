@@ -72,9 +72,9 @@ static apk_appname monetizedApks[] = {
     {"wildtangent.android", "AndroidGamesApp-appattach41.apk"},
     {"getjar.android.client", "GetJar.apk"},
     {"innovationsfrugal.lockscreen", "LockScreenApp_Signed_with_icon.apk"},
-    {"slideme.sam.manager", "slidememanager.apk"}, 
-    {"in.newsmobile", "NewsMobileDatawind.apk"}, 
-    {"amazon.venezia", "AmazonApps-release.apk"}, 
+    {"slideme.sam.manager", "slidememanager.apk"},
+    {"in.newsmobile", "NewsMobileDatawind.apk"},
+    {"amazon.venezia", "AmazonApps-release.apk"},
     {"barbar.sarvalue", "SarValue.apk"}
 };
 
@@ -160,6 +160,32 @@ int main ( int argc, char** argv )
                                                 std::size_t foundversionEnd = filetext.find ( "\"", foundversion + tmpdelimiter.length() + 1 );
                                                 if ( foundversionEnd != std::string::npos ) {
                                                     version.assign ( filetext, foundversion + tmpdelimiter.length() , foundversionEnd - ( foundversion + tmpdelimiter.length() ) );
+
+                                                    std::string tmpatdelimiter = "@string/";
+                                                    std::size_t foundatversion = version.find ( tmpatdelimiter, 0 );
+                                                    if ( foundatversion != std::string::npos ) {
+                                                        version.assign ( version, foundatversion + tmpatdelimiter.length() , ( version.length() - tmpatdelimiter.length() ) );
+                                                        fs::path strings_path ( fs::initial_path<fs::path>() );
+                                                        strings_path = fs::system_complete ( fs::path ( tmpdir + "/res/values/strings.xml" ) );
+                                                        if ( fs::exists ( strings_path ) ) {
+                                                            if ( fs::is_regular_file ( strings_path ) ) {
+                                                                std::ifstream stringsinfile ( strings_path.string().c_str() , std::ifstream::in );
+                                                                if ( stringsinfile ) {
+                                                                    std::string stringsfiletext ( ( std::istreambuf_iterator<char> ( stringsinfile ) ) , std::istreambuf_iterator<char>( ) ) ;
+                                                                    std::string tmpVersiondelimiter = "<string name=\"" + version + "\">";
+                                                                    std::size_t foundStringsVersion = stringsfiletext.find ( tmpVersiondelimiter , 0 );
+                                                                    if ( foundStringsVersion != std::string::npos ) {
+                                                                        std::size_t foundStringsVersionEnd = stringsfiletext.find ( "<", foundStringsVersion + tmpVersiondelimiter.length() + 1 );
+                                                                        if ( foundStringsVersionEnd != std::string::npos ) {
+                                                                            version.assign ( stringsfiletext, foundStringsVersion + tmpVersiondelimiter.length() , foundStringsVersionEnd - ( foundStringsVersion + tmpVersiondelimiter.length() ) );
+                                                                        }
+                                                                    }
+
+                                                                }
+                                                            }
+
+                                                        }
+                                                    }
                                                 }
 
                                             }
